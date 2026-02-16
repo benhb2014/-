@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אפליקציית מתמטיקה</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        select {
+            cursor: pointer;
+            background: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .stars-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .star {
+            font-size: 2.5em;
+            transition: all 0.3s;
+        }
+
+        .star.active {
+            color: gold;
+            filter: drop-shadow(0 0 5px gold);
+        }
+
+        .star.correct {
+            color: #4169E1;
+            filter: drop-shadow(0 0 5px #4169E1);
+        }
+
+        .star.lost {
+            opacity: 0.2;
+            color: #ccc;
+        }
+
+        .question-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .question {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+            direction: ltr;
+        }
+
+        .answer-input {
+            width: 200px;
+            padding: 15px;
+            font-size: 1.5em;
+            text-align: center;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.3em;
+            min-height: 40px;
+        }
+
+        .feedback.correct {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .feedback.wrong {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .answer-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 1.3em;
+        }
+
+        .check-mark {
+            color: #22c55e;
+            font-size: 1.5em;
+        }
+
+        .x-mark {
+            color: #ef4444;
+            font-size: 1.5em;
+        }
+
+        .progress {
+            text-align: center;
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .results-container {
+            text-align: center;
+        }
+
+        .results-container h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .score {
+            font-size: 3em;
+            color: #764ba2;
+            margin: 30px 0;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .bounce {
+            animation: bounce 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen">
+            <h1>🎯 אפליקציית מתמטיקה</h1>
+            <div class="input-group">
+                <label for="age">מה הגיל שלך?</label>
+                <input type="number" id="age" min="5" max="18" placeholder="הכנס את הגיל שלך">
+            </div>
+            <div class="input-group">
+                <label for="topic">בחר נושא:</label>
+                <select id="topic">
+                    <option value="">-- בחר נושא --</option>
+                    <option value="fractions">שברים</option>
+                    <option value="addition">חיבור וחיסור</option>
+                    <option value="multiplication">כפל וחילוק</option>
+                    <option value="decimals">מספרים עשרוניים</option>
+                </select>
+            </div>
+            <button onclick="startQuiz()">התחל!</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="hidden">
+            <div class="progress">
+                <span id="currentQuestion">1</span> / 10
+            </div>
+            <div class="stars-container" id="starsContainer"></div>
+            <div class="question-container">
+                <div class="question" id="question"></div>
+                <input type="number" step="0.01" class="answer-input" id="answerInput" placeholder="תשובה">
+                <button onclick="checkAnswer()">בדוק</button>
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="hidden">
+            <div class="results-container">
+                <h2>🎉 סיימת!</h2>
+                <div class="stars-container" id="finalStars"></div>
+                <div class="score">
+                    <span id="finalScore"></span> / 10
+                </div>
+                <div class="button-group">
+                    <button onclick="nextLevel()">המשך לשלב הבא</button>
+                    <button onclick="retry()">חזור שוב על השאלות</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let age = 0;
+        let topic = '';
+        let currentQuestionIndex = 0;
+        let stars = 10;
+        let correctAnswers = 0;
+        let questions = [];
+        let userAnsweredCorrectly = [];
+        let currentAnswer = null;
+
+        // Sound effects using Web Audio API
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            if (type === 'correct') {
+                // Happy success jingle - 3 ascending notes
+                const notes = [523.25, 659.25, 783.99]; // C, E, G
+                notes.forEach((freq, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    
+                    const startTime = audioContext.currentTime + (index * 0.1);
+                    gainNode.gain.setValueAtTime(0, startTime);
+                    gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+                    
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + 0.15);
+                });
+            } else {
+                // Gentle "oops" descending sound
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+                
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+        }
+
+        function startQuiz() {
+            age = parseInt(document.getElementById('age').value);
+            topic = document.getElementById('topic').value;
+
+            if (!age || !topic) {
+                alert('אנא מלא את כל השדות');
+                return;
+            }
+
+            currentQuestionIndex = 0;
+            stars = 10;
+            correctAnswers = 0;
+            userAnsweredCorrectly = [];
+            
+            generateQuestions();
+            initStars();
+            
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        function generateQuestions() {
+            questions = [];
+            for (let i = 0; i < 10; i++) {
+                questions.push(generateQuestion());
+            }
+        }
+
+        function getNumberRange() {
+            if (age <= 7) return 20;
+            if (age <= 9) return 50;
+            if (age <= 11) return 100;
+            return 200;
+        }
+
+        function generateQuestion() {
+            const range = getNumberRange();
+            let question, answer;
+
+            switch(topic) {
+                case 'addition':
+                    const a1 = Math.floor(Math.random() * range) + 1;
+                    const a2 = Math.floor(Math.random() * range) + 1;
+                    if (Math.random() > 0.5) {
+                        question = `${a1} + ${a2}`;
+                        answer = a1 + a2;
+                    } else {
+                        const larger = Math.max(a1, a2);
+                        const smaller = Math.min(a1, a2);
+                        question = `${larger} - ${smaller}`;
+                        answer = larger - smaller;
+                    }
+                    break;
+
+                case 'multiplication':
+                    const maxMultiply = Math.min(12, Math.floor(range / 10));
+                    const m1 = Math.floor(Math.random() * maxMultiply) + 1;
+                    const m2 = Math.floor(Math.random() * maxMultiply) + 1;
+                    if (Math.random() > 0.5) {
+                        question = `${m1} × ${m2}`;
+                        answer = m1 * m2;
+                    } else {
+                        const product = m1 * m2;
+                        question = `${product} ÷ ${m2}`;
+                        answer = m1;
+                    }
+                    break;
+
+                case 'fractions':
+                    const denominator = Math.floor(Math.random() * 8) + 2;
+                    const num1 = Math.floor(Math.random() * denominator) + 1;
+                    const num2 = Math.floor(Math.random() * denominator) + 1;
+                    if (Math.random() > 0.5) {
+                        question = `${num1}/${denominator} + ${num2}/${denominator}`;
+                        answer = parseFloat(((num1 + num2) / denominator).toFixed(2));
+                    } else {
+                        const larger = Math.max(num1, num2);
+                        const smaller = Math.min(num1, num2);
+                        question = `${larger}/${denominator} - ${smaller}/${denominator}`;
+                        answer = parseFloat(((larger - smaller) / denominator).toFixed(2));
+                    }
+                    break;
+
+                case 'decimals':
+                    const d1 = (Math.random() * (range / 10)).toFixed(1);
+                    const d2 = (Math.random() * (range / 10)).toFixed(1);
+                    if (Math.random() > 0.5) {
+                        question = `${d1} + ${d2}`;
+                        answer = parseFloat((parseFloat(d1) + parseFloat(d2)).toFixed(2));
+                    } else {
+                        const larger = Math.max(parseFloat(d1), parseFloat(d2));
+                        const smaller = Math.min(parseFloat(d1), parseFloat(d2));
+                        question = `${larger} - ${smaller}`;
+                        answer = parseFloat((larger - smaller).toFixed(2));
+                    }
+                    break;
+            }
+
+            return { question, answer };
+        }
+
+        function initStars() {
+            const container = document.getElementById('starsContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const star = document.createElement('div');
+                star.className = 'star active';
+                star.innerHTML = '⭐';
+                star.id = `star${i}`;
+                container.appendChild(star);
+            }
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= 10) {
+                showResults();
+                return;
+            }
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('question').textContent = questions[currentQuestionIndex].question + ' = ?';
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('answerInput').disabled = false;
+            currentAnswer = questions[currentQuestionIndex].answer;
+            document.getElementById('answerInput').focus();
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('answerInput').value);
+            
+            if (isNaN(userAnswer)) {
+                alert('אנא הכנס תשובה');
+                return;
+            }
+
+            document.getElementById('answerInput').disabled = true;
+
+            const isCorrect = Math.abs(userAnswer - currentAnswer) < 0.01;
+            const feedbackDiv = document.getElementById('feedback');
+
+            if (isCorrect) {
+                playSound('correct');
+                feedbackDiv.className = 'feedback correct';
+                const starElement = document.getElementById(`star${currentQuestionIndex}`);
+                starElement.classList.remove('active');
+                starElement.classList.add('correct', 'bounce');
+                correctAnswers++;
+                userAnsweredCorrectly.push(true);
+                
+                feedbackDiv.innerHTML = '<div style="font-size: 2em; color: #22c55e;">✓ נכון!</div>';
+                
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    showQuestion();
+                }, 1500);
+            } else {
+                playSound('wrong');
+                feedbackDiv.className = 'feedback wrong';
+                const starElement = document.getElementById(`star${9 - stars + 1}`);
+                if (starElement) {
+                    starElement.classList.remove('active', 'correct');
+                    starElement.classList.add('lost', 'shake');
+                }
+                stars--;
+                userAnsweredCorrectly.push(false);
+
+                feedbackDiv.innerHTML = `
+                    <div class="answer-display">
+                        <span>התשובה שלך: ${userAnswer} <span class="x-mark">✗</span></span>
+                    </div>
+                    <div class="answer-display">
+                        <span>התשובה הנכונה: ${currentAnswer} <span class="check-mark">✓</span></span>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    showQuestion();
+                }, 2500);
+            }
+        }
+
+        // Allow Enter key to submit answer
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('answerInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        });
+
+        function showResults() {
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            
+            const finalStarsContainer = document.getElementById('finalStars');
+            finalStarsContainer.innerHTML = '';
+            
+            for (let i = 0; i < 10; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.innerHTML = '⭐';
+                
+                if (userAnsweredCorrectly[i]) {
+                    star.classList.add('correct');
+                } else {
+                    star.classList.add('lost');
+                }
+                
+                finalStarsContainer.appendChild(star);
+            }
+            
+            document.getElementById('finalScore').textContent = correctAnswers;
+        }
+
+        function nextLevel() {
+            currentQuestionIndex = 0;
+            stars = 10;
+            correctAnswers = 0;
+            userAnsweredCorrectly = [];
+            
+            generateQuestions();
+            initStars();
+            
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        function retry() {
+            currentQuestionIndex = 0;
+            stars = 10;
+            correctAnswers = 0;
+            userAnsweredCorrectly = [];
+            
+            initStars();
+            
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+    </script>
+</body>
+</html>
